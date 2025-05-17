@@ -1,6 +1,7 @@
 import os
 import fitz
 
+
 def load_pdf(file_path):
     doc = fitz.open(file_path)
     text = ""
@@ -8,6 +9,7 @@ def load_pdf(file_path):
         text += page.get_text()
     doc.close()
     return text
+
 
 def load_documents_from_folder(folder_path):
     documents = []
