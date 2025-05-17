@@ -33,35 +33,25 @@ def anwser_question(question, documents, model):
 
 
 with st.sidebar:
-    uploaded_files = st.file_uploader(label="Please insert a text file.")
+    uploaded_files = st.file_uploader(
+        label="Please insert a text file.", accept_multiple_files=True)
 
 
 if uploaded_files:
-    # Ensure uploaded_files is always a list for consistent iteration
-    # If a single file is uploaded, uploaded_files is an UploadedFile object
-    # If multiple files are uploaded, uploaded_files is a list of UploadedFile objects
     if not isinstance(uploaded_files, list):
-        # Make it a list if it's a single object
         uploaded_files = [uploaded_files]
 
     # Now you can confidently loop over the list of UploadedFile objects
     for uploaded_file_obj in uploaded_files:  # Renamed for clarity
         # Check if the object is not None (shouldn't happen with file_uploader typically, but good practice)
         if uploaded_file_obj is not None:
-            # Get the file name using the .name attribute
             file_name = uploaded_file_obj.name
             file_path = os.path.join(UPLOAD_FOLDER, file_name)
-
-            # Save the file to the UPLOAD_FOLDER
-            # Ensure UPLOAD_FOLDER exists
             os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
             with open(file_path, "wb") as f:
                 f.write(uploaded_file_obj.getbuffer())
 
-            # More specific message
             st.write(f"File '{file_name}' uploaded successfully!")
-
     try:
         documents = docloader.load_documents_from_folder(UPLOAD_FOLDER)
         if documents:
