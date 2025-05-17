@@ -4,6 +4,7 @@ import os
 import docloader
 import chat_openrouter
 import embedder
+from langchain_huggingface import HuggingFaceEmbeddings
 
 st.set_page_config(layout="wide", page_title="OpenRouter chatbot app")
 st.title("OpenRouter chatbot app")
@@ -26,7 +27,7 @@ model = chat_openrouter.ChatOpenRouter(model_name=selected_model)
 
 
 def anwser_question(question, documents, model):
-    context = "\n\n".join([doc(["text"]) for doc in documents])
+    context = "\n\n".join([doc["text"] for doc in documents])
     prompt = ChatPromptTemplate.from_template(template)
     chain = prompt | model
     return chain.invoke({"question": question, "context": context})
