@@ -37,15 +37,46 @@ with st.sidebar:
 
 
 if uploaded_files:
-    for uploded_file in uploaded_files:
-        file_path = os.path.join(UPLOAD_FOLDER, uploded_file.name)
-        with open(file_path, "wb") as f:
-            f.write(uploded_file.getbuffer())
-        st.write("Files uploaded successfully!")
+    # Ensure uploaded_files is always a list for consistent iteration
+    # If a single file is uploaded, uploaded_files is an UploadedFile object
+    # If multiple files are uploaded, uploaded_files is a list of UploadedFile objects
+    if not isinstance(uploaded_files, list):
+        # Make it a list if it's a single object
+        uploaded_files = [uploaded_files]
+
+    # Now you can confidently loop over the list of UploadedFile objects
+    for uploaded_file_obj in uploaded_files:  # Renamed for clarity
+        # Check if the object is not None (shouldn't happen with file_uploader typically, but good practice)
+        if uploaded_file_obj is not None:
+            # Get the file name using the .name attribute
+            file_name = uploaded_file_obj.name
+            file_path = os.path.join(UPLOAD_FOLDER, file_name)
+
+            # Save the file to the UPLOAD_FOLDER
+            # Ensure UPLOAD_FOLDER exists
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+            with open(file_path, "wb") as f:
+                f.write(uploaded_file_obj.getbuffer())
+
+            # More specific message
+            st.write(f"File '{file_name}' uploaded successfully!")
+
+    try:
         documents = docloader.load_documents_from_folder(UPLOAD_FOLDER)
-        st.session_state.faiss_index = embedder.create_index(documents)
-        st.write("files retrived successfully!")
-        st.session_state.retrive_files = True
+        if documents:
+            st.session_state.faiss_index = embedder.create_index(documents)
+            st.write("All uploaded documents processed and indexed successfully!")
+            # Consider a better name like st.session_state.documents_indexed
+            st.session_state.retrive_files = True
+        else:
+            st.warning("No documents found in the upload folder to process.")
+
+    except Exception as e:
+        st.error(f"Error processing documents: {e}")
+        # Optionally reset state if processing failed
+        st.session_state.faiss_index = None
+        st.session_state.retrive_files = False
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = [
