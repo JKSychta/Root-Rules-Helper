@@ -5,7 +5,7 @@ import docloader
 import chat_openrouter
 import embedder
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_core import ChatPromptTemplates
+import langchain_core
 
 st.set_page_config(layout="wide", page_title="OpenRouter chatbot app")
 st.title("OpenRouter chatbot app")
