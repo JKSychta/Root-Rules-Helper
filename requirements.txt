@@ -4,7 +4,6 @@ pymupdf
 langchain_huggingface
 faiss-cpu
 langchain_openai
+langchain_core
 numpy
-torch
-transformers
-sentence-transformers
+
