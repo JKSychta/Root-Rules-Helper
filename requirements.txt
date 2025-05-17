@@ -3,3 +3,4 @@ streamlit
 pymupdf
 langchain_huggingface
 faiss-cpu
+langchain_openai
