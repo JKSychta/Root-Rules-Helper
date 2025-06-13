@@ -42,8 +42,8 @@ def load_documents_from_folder(folder_path):
     # 1 token is roughly 4 characters in English, so 500 tokens ~ 2000 characters.
     # chunk_overlap ensures context isn't lost at chunk boundaries.
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,  # Example: 1000 characters (adjust for tokens)
-        chunk_overlap=200,  # Example: 200 characters overlap
+        chunk_size=500,  # Example: 1000 characters (adjust for tokens)
+        chunk_overlap=100,  # Example: 200 characters overlap
         length_function=len,  # Use character length
         add_start_index=True,  # Add start index to metadata for debugging
     )

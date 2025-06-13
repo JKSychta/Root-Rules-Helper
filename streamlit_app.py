@@ -23,7 +23,24 @@ Context: {context}
 Anwser:
 """
 
-# api_key, base_url = os.environ["API_KEY"], os.environ["BASE_URL"]
+
+hello_msg = """
+Hi I am a Root assistant!
+Root is a strategic and thematic board game for 1 to 6 players, where participants compete to become the most powerful entity controlling the vast Woodland. Here's a summary based on the context provided:
+
+Core Mechanics:
+
+    Map: Gameplay revolves around a map depicting distinct "clearings" connected by paths and containing forests.
+    Factions: Players choose from one of four unique factions (Marquise de Cat, Eyrie Dynasties, Forest Alliance, Riverfolk Company) who approach the Woodland in distinct ways.
+    Woodland Control: Players use their "warriors" to rule clearings. A ruling faction can perform actions like moving warriors, potentially building "victory point" buildings specific to their faction.
+    Hirelings: Earn special "hireling cards" used each turn for specific actions, controlled by "control markers" placed on them.
+    Flow: Turns consist of three phases: Birdsong, Daylight, and Evening, with specific actions dictated by both the turn phase and the chosen faction.
+    Victory: Winning requires achieving 30 "victory points" through faction-specific methods (e.g., building structures) or completing special "dominance" cards.
+
+The game emphasizes organic learning, with mechanics flowing through the interaction on the map and via the turn phases defined by faction cards.
+
+"""
+
 api_key, base_url = st.secrets["API_KEY"], st.secrets["BASE_URL"]
 # selected_model = "google/gemma-3-1b-it:free"
 # <- wybrano model deepseek/deepseek-r1-0528-qwen3-8b:free bo miał największą ilość darmowych tokenów co jest potrzebne przy ilośći tekstu wymagenaj przez instrukcje
@@ -37,8 +54,6 @@ def anwser_question(question, documents, model):
     chain = prompt | model
     return chain.invoke({"question": question, "context": context})
 
-
-# --- START OF MODIFIED SECTION FOR INITIAL LOADING ---
 
 # Initialize session state variables if they don't exist
 if "faiss_index" not in st.session_state:
@@ -73,53 +88,18 @@ if not st.session_state.documents_indexed:
     if st.session_state.faiss_index is not None:
         st.session_state.documents_indexed = True
 
-# --- END OF MODIFIED SECTION FOR INITIAL LOADING - --
+
 with st.sidebar:
-    st.markdown("---")  # Optional separator for visual clarity
+    st.markdown("---")
     if st.button("Clear Chat"):
         st.session_state.messages = [
-            {"role": "assistant", "content": "How can I help you?."}]
-        st.rerun()  # Rerun the app to update the chat display
-
-#     uploaded_files = st.file_uploader(
-#         label="Please insert a text file.", accept_multiple_files=True)
-
-
-# if uploaded_files:
-#     if not isinstance(uploaded_files, list):
-#         uploaded_files = [uploaded_files]
-
-#     # Now you can confidently loop over the list of UploadedFile objects
-#     for uploaded_file_obj in uploaded_files:  # Renamed for clarity
-#         # Check if the object is not None (shouldn't happen with file_uploader typically, but good practice)
-#         if uploaded_file_obj is not None:
-#             file_name = uploaded_file_obj.name
-#             file_path = os.path.join(UPLOAD_FOLDER, file_name)
-#             os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-#             with open(file_path, "wb") as f:
-#                 f.write(uploaded_file_obj.getbuffer())
-
-#             st.write(f"File '{file_name}' uploaded successfully!")
-#     try:
-#         documents = docloader.load_documents_from_folder(UPLOAD_FOLDER)
-#         if documents:
-#             st.session_state.faiss_index = embedder.create_index(documents)
-#             st.write("All uploaded documents processed and indexed successfully!")
-#             # Consider a better name like st.session_state.documents_indexed
-#             st.session_state.retrive_files = True
-#         else:
-#             st.warning("No documents found in the upload folder to process.")
-
-#     except Exception as e:
-#         st.error(f"Error processing documents: {e}")
-#         # Optionally reset state if processing failed
-#         st.session_state.faiss_index = None
-#         st.session_state.retrive_files = False
+            {"role": "assistant", "content": hello_msg}]
+        st.rerun()
 
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = [
-        {"role": "assistant", "content": "How can I help you?."}]
+        {"role": "assistant", "content": hello_msg}]
 
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
@@ -129,7 +109,6 @@ if prompt := st.chat_input():
     if not api_key:
         st.info("Invalid API key.")
         st.stop()
-    # client = OpenAI(api_key=api_key, base_url=base_url) # Not needed with current setup
 
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
@@ -137,21 +116,17 @@ if prompt := st.chat_input():
     # Default fallback message
     response_content = "I'm sorry, an error occurred or no relevant information could be found."
 
-    if st.session_state.faiss_index is not None:  # Check if index is available
-        # 1. Retrieve relevant documents based on the prompt
-        # Use a reasonable 'k' based on your chunking strategy and LLM context
-        k_relevant_docs = 5  # Example: retrieve 5 most relevant chunks
+    if st.session_state.faiss_index is not None:
+        k_relevant_docs = 3
         retrieved_docs = embedder.retrieve_docs(
             prompt, st.session_state.faiss_index, k=k_relevant_docs)
 
         if retrieved_docs:
-            # 2. Pass *only* the retrieved documents to the answering function
             response_obj = anwser_question(prompt, retrieved_docs, model)
             response_content = response_obj.content
         else:
             st.warning(
                 "No relevant document chunks found for your query. Answering without specific context.")
-            # Fallback to general chat if no docs are found, using a simpler prompt
             prompt_no_context = ChatPromptTemplate.from_template(
                 "Question: {question}\nAnswer:")
             chain_no_context = prompt_no_context | model
@@ -160,14 +135,12 @@ if prompt := st.chat_input():
     else:
         st.warning(
             "No documents have been loaded and indexed. Please ensure files are in 'data/uploaded_pdfs' when the app starts.")
-        # Fallback to general chat if no index exists
         prompt_no_context = ChatPromptTemplate.from_template(
             "Question: {question}\nAnswer:")
         chain_no_context = prompt_no_context | model
         response_obj = chain_no_context.invoke({"question": prompt})
         response_content = response_obj.content
 
-    # Now, add and display the final response content
     st.session_state.messages.append(
         {"role": "assistant", "content": response_content})
     st.chat_message("assistant").write(response_content)
