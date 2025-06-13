@@ -53,6 +53,9 @@ def load_and_index_documents(folder_path):
     except Exception as e:
         st.error(f"Error processing documents: {e}")
         return None
+
+
+st.session_state.faiss_index = load_and_index_documents(UPLOAD_FOLDER)
 # with st.sidebar:
 #     uploaded_files = st.file_uploader(
 #         label="Please insert a text file.", accept_multiple_files=True)
