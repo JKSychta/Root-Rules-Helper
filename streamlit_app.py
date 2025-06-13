@@ -72,42 +72,43 @@ if not st.session_state.documents_indexed:
     if st.session_state.faiss_index is not None:
         st.session_state.documents_indexed = True
 
-# --- END OF MODIFIED SECTION FOR INITIAL LOADING ---
-# with st.sidebar:
-#     uploaded_files = st.file_uploader(
-#         label="Please insert a text file.", accept_multiple_files=True)
+# --- END OF MODIFIED SECTION FOR INITIAL LOADING - --
+with st.sidebar:
+    uploaded_files = st.file_uploader(
+        label="Please insert a text file.", accept_multiple_files=True)
 
 
-# if uploaded_files:
-#     if not isinstance(uploaded_files, list):
-#         uploaded_files = [uploaded_files]
+if uploaded_files:
+    if not isinstance(uploaded_files, list):
+        uploaded_files = [uploaded_files]
 
-#     # Now you can confidently loop over the list of UploadedFile objects
-#     for uploaded_file_obj in uploaded_files:  # Renamed for clarity
-#         # Check if the object is not None (shouldn't happen with file_uploader typically, but good practice)
-#         if uploaded_file_obj is not None:
-#             file_name = uploaded_file_obj.name
-#             file_path = os.path.join(UPLOAD_FOLDER, file_name)
-#             os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-#             with open(file_path, "wb") as f:
-#                 f.write(uploaded_file_obj.getbuffer())
+    # Now you can confidently loop over the list of UploadedFile objects
+    for uploaded_file_obj in uploaded_files:  # Renamed for clarity
+        # Check if the object is not None (shouldn't happen with file_uploader typically, but good practice)
+        if uploaded_file_obj is not None:
+            file_name = uploaded_file_obj.name
+            file_path = os.path.join(UPLOAD_FOLDER, file_name)
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+            with open(file_path, "wb") as f:
+                f.write(uploaded_file_obj.getbuffer())
 
-#             st.write(f"File '{file_name}' uploaded successfully!")
-#     try:
-#         documents = docloader.load_documents_from_folder(UPLOAD_FOLDER)
-#         if documents:
-#             st.session_state.faiss_index = embedder.create_index(documents)
-#             st.write("All uploaded documents processed and indexed successfully!")
-#             # Consider a better name like st.session_state.documents_indexed
-#             st.session_state.retrive_files = True
-#         else:
-#             st.warning("No documents found in the upload folder to process.")
+            st.write(f"File '{file_name}' uploaded successfully!")
+    try:
+        documents = docloader.load_documents_from_folder(UPLOAD_FOLDER)
+        if documents:
+            st.session_state.faiss_index = embedder.create_index(documents)
+            st.write("All uploaded documents processed and indexed successfully!")
+            # Consider a better name like st.session_state.documents_indexed
+            st.session_state.retrive_files = True
+        else:
+            st.warning("No documents found in the upload folder to process.")
 
-#     except Exception as e:
-#         st.error(f"Error processing documents: {e}")
-#         # Optionally reset state if processing failed
-#         st.session_state.faiss_index = None
-#         st.session_state.retrive_files = False
+    except Exception as e:
+        st.error(f"Error processing documents: {e}")
+        # Optionally reset state if processing failed
+        st.session_state.faiss_index = None
+        st.session_state.retrive_files = False
+
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = [
