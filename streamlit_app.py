@@ -37,25 +37,42 @@ def anwser_question(question, documents, model):
     return chain.invoke({"question": question, "context": context})
 
 
-@st.cache_resource
+# --- START OF MODIFIED SECTION FOR INITIAL LOADING ---
+
+# Initialize session state variables if they don't exist
+if "faiss_index" not in st.session_state:
+    st.session_state.faiss_index = None
+if "documents_indexed" not in st.session_state:
+    # A flag to know if indexing has occurred
+    st.session_state.documents_indexed = False
+
+# Define a function to load and index documents (can be called once)
+
+
+@st.cache_resource  # Use st.cache_resource to cache heavy objects like FAISS index
 def load_and_index_documents(folder_path):
-    """Loads documents from a folder and creates a FAISS index."""
-    st.info("Loading and indexing documents... This might take a moment.")
     try:
         documents = docloader.load_documents_from_folder(folder_path)
         if documents:
             faiss_index = embedder.create_index(documents)
-            st.success("Documents loaded and indexed successfully!")
+            st.success(
+                "All pre-existing documents processed and indexed successfully!")
             return faiss_index
         else:
-            st.warning("No documents found in the upload folder to process.")
+            st.info("No pre-existing documents found in the initial folder.")
             return None
     except Exception as e:
-        st.error(f"Error processing documents: {e}")
+        st.error(f"Error processing pre-existing documents: {e}")
         return None
 
 
-st.session_state.faiss_index = load_and_index_documents(UPLOAD_FOLDER)
+# Load and index documents at startup, but only if not already done
+if not st.session_state.documents_indexed:
+    st.session_state.faiss_index = load_and_index_documents(UPLOAD_FOLDER)
+    if st.session_state.faiss_index is not None:
+        st.session_state.documents_indexed = True
+
+# --- END OF MODIFIED SECTION FOR INITIAL LOADING ---
 # with st.sidebar:
 #     uploaded_files = st.file_uploader(
 #         label="Please insert a text file.", accept_multiple_files=True)
@@ -92,44 +109,6 @@ st.session_state.faiss_index = load_and_index_documents(UPLOAD_FOLDER)
 #         st.session_state.faiss_index = None
 #         st.session_state.retrive_files = False
 
-# if "messages" not in st.session_state:
-#     st.session_state["messages"] = [
-#         {"role": "assistant", "content": "How can I help you?."}]
-
-# for msg in st.session_state.messages:
-#     st.chat_message(msg["role"]).write(msg["content"])
-
-# if prompt := st.chat_input():
-#     if not api_key:
-#         st.info("Invalid API key.")
-#         st.stop()
-#     client = OpenAI(api_key=api_key, base_url=base_url)
-#     st.session_state.messages.append({"role": "user", "content": prompt})
-#     st.chat_message("user").write(prompt)
-#     if "faiss_index" in st.session_state and st.session_state.faiss_index is not None:
-#         # 1. Retrieve relevant documents based on the prompt
-#         retrieved_docs = embedder.retrieve_docs(
-#             prompt, st.session_state.faiss_index, k=3)
-#         # 2. Pass *only* the retrieved documents to the answering function
-#         response = anwser_question(prompt, retrieved_docs, model)
-#     else:
-#         # Fallback if no documents are indexed, just answer with the LLM without context
-#         # Or handle this case by informing the user to upload documents
-#         st.warning(
-#             "Please upload and process documents first for context-aware answers.")
-#         # You might create a simpler chain here without context
-#     prompt_no_context = ChatPromptTemplate.from_template(
-#         "Question: {question}\nAnswer:")
-#     chain_no_context = prompt_no_context | model
-#     response = chain_no_context.invoke({"question": prompt})
-#     response = anwser_question(prompt, documents, model)
-#     # response = client.chat.completions.create(
-#     #     model=selected_model,
-#     #     messages=st.session_state.messages
-#     # )
-#     msg = response.content
-#     st.session_state.messages.append({"role": "assistant", "content": msg})
-#     st.chat_message("assistant").write(msg)
 if "messages" not in st.session_state:
     st.session_state["messages"] = [
         {"role": "assistant", "content": "How can I help you?."}]
@@ -141,44 +120,30 @@ if prompt := st.chat_input():
     if not api_key:
         st.info("Invalid API key.")
         st.stop()
-    # client = OpenAI(api_key=api_key, base_url=base_url) # Not needed with current setup
-
+    client = OpenAI(api_key=api_key, base_url=base_url)
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
-
-    response_content = "I'm sorry, I cannot answer without context. Please ensure documents are loaded and indexed."
-
-    # Check if the FAISS index exists in session_state (populated by the cached function)
-    if st.session_state.faiss_index is not None:
+    if "faiss_index" in st.session_state and st.session_state.faiss_index is not None:
         # 1. Retrieve relevant documents based on the prompt
-        # Use a reasonable 'k' based on your chunking strategy and LLM context
-        k_relevant_docs = 5  # Example: retrieve 5 most relevant chunks
         retrieved_docs = embedder.retrieve_docs(
-            prompt, st.session_state.faiss_index, k=k_relevant_docs)
-
-        if retrieved_docs:
-            # 2. Pass *only* the retrieved documents to the answering function
-            response_obj = anwser_question(prompt, retrieved_docs, model)
-            response_content = response_obj.content
-        else:
-            st.warning(
-                "No relevant document chunks found for your query. Answering without specific context.")
-            # Fallback to general chat if no docs are found, using a simpler prompt
-            prompt_no_context = ChatPromptTemplate.from_template(
-                "Question: {question}\nAnswer:")
-            chain_no_context = prompt_no_context | model
-            response_obj = chain_no_context.invoke({"question": prompt})
-            response_content = response_obj.content
+            prompt, st.session_state.faiss_index, k=3)
+        # 2. Pass *only* the retrieved documents to the answering function
+        response = anwser_question(prompt, retrieved_docs, model)
     else:
+        # Fallback if no documents are indexed, just answer with the LLM without context
+        # Or handle this case by informing the user to upload documents
         st.warning(
-            "No documents have been loaded and indexed. Please ensure files are in 'data/uploaded_pdfs' when the app starts.")
-        # Fallback to general chat if no index exists
-        prompt_no_context = ChatPromptTemplate.from_template(
-            "Question: {question}\nAnswer:")
-        chain_no_context = prompt_no_context | model
-        response_obj = chain_no_context.invoke({"question": prompt})
-        response_content = response_obj.content
-
-    st.session_state.messages.append(
-        {"role": "assistant", "content": response_content})
-    st.chat_message("assistant").write(response_content)
+            "Please upload and process documents first for context-aware answers.")
+        # You might create a simpler chain here without context
+    prompt_no_context = ChatPromptTemplate.from_template(
+        "Question: {question}\nAnswer:")
+    chain_no_context = prompt_no_context | model
+    response = chain_no_context.invoke({"question": prompt})
+    response = anwser_question(prompt, documents, model)
+    # response = client.chat.completions.create(
+    #     model=selected_model,
+    #     messages=st.session_state.messages
+    # )
+    msg = response.content
+    st.session_state.messages.append({"role": "assistant", "content": msg})
+    st.chat_message("assistant").write(msg)
