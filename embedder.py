@@ -16,7 +16,9 @@ class FAISSIndex:
         return results
 
 
-embed_model_id = 'intfloat/e5-small-v2'
+# 'intfloat/e5-small-v2'
+# https://huggingface.co/intfloat/e5-mistral-7b-instruct -> miał lepsze opinie a mniejszy model słabiej radził sobie z instrukcją
+embed_model_id = 'intfloat/e5-mistral-7b-instruct'
 model_kwargs = {"device": "cpu", "trust_remote_code": True}
 
 

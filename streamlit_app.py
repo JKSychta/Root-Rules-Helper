@@ -14,8 +14,8 @@ UPLOAD_FOLDER = "data/uploaded_pdfs"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 template = """
-You are an assistant for question-anwsering tasks. Use Polish language by default.
-If you don't know the nawser, just sa that you don't know. Use three sentences maximum anwsers.
+You are a board game rulebook helper. Use English language by default.
+If you don't know the anwser, just say that you don't know.
 Question: {question}
 Context: {context}
 Anwser:
@@ -23,7 +23,9 @@ Anwser:
 
 # api_key, base_url = os.environ["API_KEY"], os.environ["BASE_URL"]
 api_key, base_url = st.secrets["API_KEY"], st.secrets["BASE_URL"]
-selected_model = "google/gemma-3-1b-it:free"
+# selected_model = "google/gemma-3-1b-it:free"
+# <- wybrano model deepseek/deepseek-r1-0528-qwen3-8b:free bo miał największą ilość darmowych tokenów co jest potrzebne przy ilośći tekstu wymagenaj przez instrukcje
+selected_model = st.secrets["MODEL"]
 model = chat_openrouter.ChatOpenRouter(model_name=selected_model)
 
 
