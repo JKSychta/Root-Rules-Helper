@@ -10,7 +10,8 @@ from langchain_core.prompts import ChatPromptTemplate
 st.set_page_config(layout="wide", page_title="OpenRouter chatbot app")
 st.title("OpenRouter chatbot app")
 
-UPLOAD_FOLDER = "data/uploaded_pdfs"
+# UPLOAD_FOLDER = "data/uploaded_pdfs"
+UPLOAD_FOLDER = "data/pdf"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 template = """
@@ -36,41 +37,57 @@ def anwser_question(question, documents, model):
     return chain.invoke({"question": question, "context": context})
 
 
-with st.sidebar:
-    uploaded_files = st.file_uploader(
-        label="Please insert a text file.", accept_multiple_files=True)
-
-
-if uploaded_files:
-    if not isinstance(uploaded_files, list):
-        uploaded_files = [uploaded_files]
-
-    # Now you can confidently loop over the list of UploadedFile objects
-    for uploaded_file_obj in uploaded_files:  # Renamed for clarity
-        # Check if the object is not None (shouldn't happen with file_uploader typically, but good practice)
-        if uploaded_file_obj is not None:
-            file_name = uploaded_file_obj.name
-            file_path = os.path.join(UPLOAD_FOLDER, file_name)
-            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-            with open(file_path, "wb") as f:
-                f.write(uploaded_file_obj.getbuffer())
-
-            st.write(f"File '{file_name}' uploaded successfully!")
+@st.cache_resource
+def load_and_index_documents(folder_path):
+    """Loads documents from a folder and creates a FAISS index."""
+    st.info("Loading and indexing documents... This might take a moment.")
     try:
-        documents = docloader.load_documents_from_folder(UPLOAD_FOLDER)
+        documents = docloader.load_documents_from_folder(folder_path)
         if documents:
-            st.session_state.faiss_index = embedder.create_index(documents)
-            st.write("All uploaded documents processed and indexed successfully!")
-            # Consider a better name like st.session_state.documents_indexed
-            st.session_state.retrive_files = True
+            faiss_index = embedder.create_index(documents)
+            st.success("Documents loaded and indexed successfully!")
+            return faiss_index
         else:
             st.warning("No documents found in the upload folder to process.")
-
+            return None
     except Exception as e:
         st.error(f"Error processing documents: {e}")
-        # Optionally reset state if processing failed
-        st.session_state.faiss_index = None
-        st.session_state.retrive_files = False
+        return None
+# with st.sidebar:
+#     uploaded_files = st.file_uploader(
+#         label="Please insert a text file.", accept_multiple_files=True)
+
+
+# if uploaded_files:
+#     if not isinstance(uploaded_files, list):
+#         uploaded_files = [uploaded_files]
+
+#     # Now you can confidently loop over the list of UploadedFile objects
+#     for uploaded_file_obj in uploaded_files:  # Renamed for clarity
+#         # Check if the object is not None (shouldn't happen with file_uploader typically, but good practice)
+#         if uploaded_file_obj is not None:
+#             file_name = uploaded_file_obj.name
+#             file_path = os.path.join(UPLOAD_FOLDER, file_name)
+#             os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+#             with open(file_path, "wb") as f:
+#                 f.write(uploaded_file_obj.getbuffer())
+
+#             st.write(f"File '{file_name}' uploaded successfully!")
+#     try:
+#         documents = docloader.load_documents_from_folder(UPLOAD_FOLDER)
+#         if documents:
+#             st.session_state.faiss_index = embedder.create_index(documents)
+#             st.write("All uploaded documents processed and indexed successfully!")
+#             # Consider a better name like st.session_state.documents_indexed
+#             st.session_state.retrive_files = True
+#         else:
+#             st.warning("No documents found in the upload folder to process.")
+
+#     except Exception as e:
+#         st.error(f"Error processing documents: {e}")
+#         # Optionally reset state if processing failed
+#         st.session_state.faiss_index = None
+#         st.session_state.retrive_files = False
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = [
