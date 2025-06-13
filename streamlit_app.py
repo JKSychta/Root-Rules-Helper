@@ -29,13 +29,12 @@ Hi I am a Root assistant!
 Root is a strategic and thematic board game for 1 to 6 players, where participants compete to become the most powerful entity controlling the vast Woodland. Here's a summary based on the context provided:
 
 Core Mechanics:
-
-    Map: Gameplay revolves around a map depicting distinct "clearings" connected by paths and containing forests.
-    Factions: Players choose from one of four unique factions (Marquise de Cat, Eyrie Dynasties, Forest Alliance, Riverfolk Company) who approach the Woodland in distinct ways.
-    Woodland Control: Players use their "warriors" to rule clearings. A ruling faction can perform actions like moving warriors, potentially building "victory point" buildings specific to their faction.
-    Hirelings: Earn special "hireling cards" used each turn for specific actions, controlled by "control markers" placed on them.
-    Flow: Turns consist of three phases: Birdsong, Daylight, and Evening, with specific actions dictated by both the turn phase and the chosen faction.
-    Victory: Winning requires achieving 30 "victory points" through faction-specific methods (e.g., building structures) or completing special "dominance" cards.
+Map: Gameplay revolves around a map depicting distinct "clearings" connected by paths and containing forests.
+Factions: Players choose from one of four unique factions (Marquise de Cat, Eyrie Dynasties, Forest Alliance, Riverfolk Company) who approach the Woodland in distinct ways.
+Woodland Control: Players use their "warriors" to rule clearings. A ruling faction can perform actions like moving warriors, potentially building "victory point" buildings specific to their faction.
+Hirelings: Earn special "hireling cards" used each turn for specific actions, controlled by "control markers" placed on them.
+Flow: Turns consist of three phases: Birdsong, Daylight, and Evening, with specific actions dictated by both the turn phase and the chosen faction.
+Victory: Winning requires achieving 30 "victory points" through faction-specific methods (e.g., building structures) or completing special "dominance" cards.
 
 The game emphasizes organic learning, with mechanics flowing through the interaction on the map and via the turn phases defined by faction cards.
 
