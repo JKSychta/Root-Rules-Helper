@@ -79,7 +79,8 @@ with st.sidebar:
     if st.button("Clear Chat"):
         st.session_state.messages = [
             {"role": "assistant", "content": "How can I help you?."}]
-        st.experimental_rerun()  # Rerun the app to update the chat display
+        st.rerun()  # Rerun the app to update the chat display
+
 #     uploaded_files = st.file_uploader(
 #         label="Please insert a text file.", accept_multiple_files=True)
 
