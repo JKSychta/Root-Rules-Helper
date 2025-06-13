@@ -18,7 +18,7 @@ class FAISSIndex:
 
 # 'intfloat/e5-small-v2'
 # https://huggingface.co/intfloat/e5-mistral-7b-instruct -> miał lepsze opinie a mniejszy model słabiej radził sobie z instrukcją
-embed_model_id = 'intfloat/e5-mistral-7b-instruct'
+embed_model_id = 'sentence-transformers/all-MiniLM-L6-v2'
 model_kwargs = {"device": "cpu", "trust_remote_code": True}
 
 
