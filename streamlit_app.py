@@ -10,8 +10,8 @@ from langchain_core.prompts import ChatPromptTemplate
 st.set_page_config(layout="wide", page_title="OpenRouter chatbot app")
 st.title("OpenRouter chatbot app")
 
-# UPLOAD_FOLDER = "data/uploaded_pdfs"
-UPLOAD_FOLDER = "data/pdf"
+UPLOAD_FOLDER = "data/uploaded_pdfs"
+# UPLOAD_FOLDER = "data/pdf"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 template = """
