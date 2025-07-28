@@ -1,4 +1,4 @@
-# Root rules helper
+# 😺🤖Root rules helper🤖😺
 
 This little project is a streamlit powered AI chatbot, enchanced with RAG that helps you get all of your buring *Root: A Game of Woodland Might and Right* rule questions!
 
